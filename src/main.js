@@ -5,7 +5,7 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 import { fetchPhotosByQuery } from './js/pixabay-api.js';
-import { renderGallery, hideElement, showElement } from './js/render-functions';
+import { createGallery, hideElement, showElement } from './js/render-functions';
 
 const form = document.getElementById('search-form');
 const input = document.getElementById('search-input');
@@ -30,29 +30,27 @@ function showError(message) {
 }
 
 async function loadImages() {
-  if (query === '') {
-    showError('Please, enter the search query!');
-    return;
-  }
-
   showElement(loadingIndicator);
+  hideElement(loadMore);
 
   try {
     const result = await fetchPhotosByQuery(query, currentPage, imagesPerPage);
     console.log(result);
     if (result.total === 0) {
+      hideElement(loadingIndicator);
       showError(
         'Sorry, there are no images matching your search query. Please try again!'
       );
       return;
     }
 
-    results.innerHTML = results.innerHTML + renderGallery(result.hits);
+    results.insertAdjacentHTML('beforeend', createGallery(result.hits));
     lightbox.refresh();
 
     if (currentPage * imagesPerPage >= result.totalHits) {
       showError("We're sorry, but you've reached the end of search results.");
-      hideElement(loadMore);
+    } else {
+      showElement(loadMore, 'inline-block');
     }
   } catch (error) {
     showError('Sorry, some error occured. Please, try again!');
@@ -67,10 +65,11 @@ form.addEventListener('submit', async e => {
   currentPage = 1;
   query = input.value.trim();
   results.innerHTML = '';
-
+  if (query === '') {
+    showError('Please, enter the search query!');
+    return;
+  }
   await loadImages();
-
-  showElement(loadMore, 'inline-block');
 });
 
 loadMore.addEventListener('click', async e => {

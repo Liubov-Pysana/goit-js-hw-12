@@ -14,9 +14,5 @@ export const fetchPhotosByQuery = async (query, page, perPage) => {
   });
 
   const response = await axios.get(`${BASE_URL}?${searchParams}`);
-  if (response.status != 200) {
-    throw Error(response.statusText);
-  }
-
   return response.data;
 };

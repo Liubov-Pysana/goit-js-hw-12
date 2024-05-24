@@ -1,4 +1,4 @@
-export const renderGallery = hits => {
+export const createGallery = hits => {
   return hits
     .map(
       hit => `<li>
